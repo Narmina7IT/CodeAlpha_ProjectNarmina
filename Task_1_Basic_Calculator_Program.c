@@ -3,47 +3,62 @@
 #include <stdbool.h>
 
 int main(){
-    float a,b;
+    double a,b, result;
     char c;
-    float sum;
+    printf("\tSimple Calculator\n");
 
     while(true){
-        printf("Enter the expression['q' to exit]: ");
-        if(scanf("%f %c %f", &a, &c, &b) != 3){
-            printf("Exitinq.\n");
-            return 1;
-        };
+
+        printf("Enter the expression: ");
+
+        if(scanf("%lf %c %lf", &a, &c, &b) != 3){
+
+            int ch;
+            while((ch = getchar()) != '\n' && ch != EOF);
+
+            printf("You want to exit? Press y to exit: ");
+            char answer;
+            if(scanf(" %c", &answer) == 1 && (answer == 'y' || answer == 'Y')){
+                printf("Exiting.\n");
+                return 0;
+            }
+
+            continue;
+        }
 
         switch(c){
             case '+':
-                sum = a+b;
+                result = a+b;
                 break;
 
             case '-':
-                sum = a-b;
+                result = a-b;
                 break;
 
             case '/':
             case ':':
                 if(b==0){
-                    printf("You can't divide number by zero!");
-                    return 1;
+                    printf("You can't divide number by zero!\n");
+                    continue;
                 }
-                else{
-                    sum = a/b;
-                }
+                
+                result = a/b;
                 break;
 
             case '*':
-                sum = a*b;
+                result = a*b;
                 break;
 
             default:
-                printf("Invalid input!");
-                return 1;
+                printf("Invalid input! Please try again.\n");
+                continue;
         }
 
-        printf("=%.2f\n\n",sum);
+        if(result == (long)result){
+            printf("=%ld\n\n", (long)result);
+        } else{
+            printf("=%.2lf\n\n",result);
+        }
     }
 
     return 0;
