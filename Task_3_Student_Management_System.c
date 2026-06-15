@@ -27,8 +27,8 @@ int main(){
 }
 
 void menu(){
-    printf("Hello, dear user!\nThis ADUSD(Add, Delete, Update, Search, Display)! And we are very pleased to serve you.\n");
-    while(1){
+    printf("\nHello, dear user!\nThis ADUSD(Add, Delete, Update, Search, Display)! And we are very pleased to serve you.\n");
+    while(true){
         printf("\nMenu:\n1.Add\n2.Delete\n3.Update\n4.Search\n5.Display\n6.Exit\nChoose an option [1-6]: ");
         int choice;
         scanf("%d", &choice);
@@ -65,14 +65,27 @@ void menu(){
 void add(){
     struct Student s;
 
-    printf("Enter the name for new student: ");
+    printf("\nEnter the name for new student: ");
     scanf("%9s", s.Name);
     printf("Enter the surname for %s student: ", s.Name);
     scanf("%9s", s.Surname);
-    printf("WHat is the ID of %s %s?: ", s.Name, s.Surname);
+    printf("What is the ID of %s %s?: ", s.Name, s.Surname);
     scanf("%d", &s.ID);
     printf("Enter the gpa: ");
     scanf("%f", &s.gpa);
+
+    FILE *check = fopen(DATA_FILE, "r");
+    if(check != NULL){
+        struct Student temp;
+        while(fscanf(check, " %9[^,],%9[^,],%d,%f\n", temp.Name, temp.Surname, &temp.ID, &temp.gpa) == 4){
+            if(temp.ID == s.ID){
+                printf("There is already a student with %d ID. Try another one.\n\n", s.ID);
+                fclose(check);
+                return;
+            }
+        }
+        fclose(check);
+    }
 
     FILE *file = fopen(DATA_FILE, "a");
     if(file == NULL){
@@ -80,10 +93,10 @@ void add(){
         return;
     }
 
-    fprintf(file, "%s;%s;%d;%.2f\n", s.Name, s.Surname, s.ID, s.gpa);
+    fprintf(file, "%s,%s,%d,%.2f\n", s.Name, s.Surname, s.ID, s.gpa);
 
     fclose(file);
-    printf("You succesfully added new student to the list!\n\n");
+    printf("You successfully added new student to the list!\n\n");
 }
 
 void delete(){
@@ -100,15 +113,15 @@ void delete(){
     bool isDeleted = false;
     struct Student s;
 
-    printf("Enter the ID of the student u want to delete: ");
+    printf("\nEnter the ID of the student you want to delete: ");
     scanf("%d", &deleteID);
 
-    while(fscanf(file, " %[^;];%[^;];%d;%f\n", s.Name, s.Surname, &s.ID, &s.gpa) == 4){
+    while(fscanf(file, " %9[^,],%9[^,],%d,%f\n", s.Name, s.Surname, &s.ID, &s.gpa) == 4){
         if(s.ID == deleteID){
             isDeleted = true;
             continue;
         }
-        fprintf(temp,"%s;%s;%d;%.2f\n", s.Name, s.Surname, s.ID, s.gpa);
+        fprintf(temp,"%s,%s,%d,%.2f\n", s.Name, s.Surname, s.ID, s.gpa);
     }
 
     fclose(temp);
@@ -138,41 +151,66 @@ void update(){
     int updatedId;
     bool isUpdated = false;
 
-    printf("Enter the ID of the student whose information u want to change: ");
+    printf("\nEnter the ID of the student whose information u want to change: ");
     scanf("%d", &updatedId);
 
-    while(fscanf(file, " %[^;];%[^;];%d;%f\n", s.Name, s.Surname, &s.ID, &s.gpa) == 4){
+    while(fscanf(file, " %9[^,],%9[^,],%d,%f\n", s.Name, s.Surname, &s.ID, &s.gpa) == 4){
         if(s.ID == updatedId){
             isUpdated = true;
-            printf("Student:\nName: %s\nSurname: %s\nID: %d\nGPA: %.2f\n", s.Name, s.Surname, s.ID, s.gpa);
+            printf("\nStudent:\nName: %s\nSurname: %s\nID: %d\nGPA: %.2f\n", s.Name, s.Surname, s.ID, s.gpa);
             bool updating = true;
 
             while(updating){
-                printf("What do you want to change?\n1.Name\n2.Surname\n3.ID\n4.GPA\n5.Exit\nYour answer[1-5]: ");
+                printf("\nWhat do you want to change?\n1.Name\n2.Surname\n3.ID\n4.GPA\n5.Exit\nYour answer[1-5]: ");
                 int choice;
                 scanf("%d", &choice);
 
                 switch(choice){
                 case 1:
-                    printf("New name: ");
+                    printf("\nNew name: ");
                     scanf("%9s", s.Name);
                     break;
+
                 case 2:
-                    printf("New surame: ");
+                    printf("\nNew surname: ");
                     scanf("%9s", s.Surname);
                     break;
+
                 case 3:
-                    printf("New ID: ");
-                    scanf("%d", &s.ID);
+                    printf("\nNew ID: ");
+                    int newId;
+                    scanf("%d", &newId);
+
+                    if(newId != s.ID){
+                        int idExists = 0;
+                        FILE *check = fopen(DATA_FILE, "r");
+                        if(check != NULL){
+                            struct Student temp;
+                            while(fscanf(check, " %9[^,],%9[^,],%d,%f\n", temp.Name, temp.Surname, &temp.ID, &temp.gpa) == 4){
+                                if(temp.ID == newId){
+                                    printf("There is already a student with %d ID. Try another one.\n\n", newId);
+                                    idExists = 1;
+                                    break;
+                                }
+                            }
+                            fclose(check);
+                        }
+                        if(idExists == 0){
+                            s.ID = newId;
+                        }
+                    }
                     break;
+
                 case 4:
-                    printf("New GPA: ");
+                    printf("\nNew GPA: ");
                     scanf("%f", &s.gpa);
                     break;
+
                 case 5:
-                    printf("U are exiting.\n");
+                    printf("\nYou are exiting.\n");
                     updating = false;
                     break;
+
                 default:
                     printf("Invalid input!\n");
 
@@ -180,7 +218,7 @@ void update(){
 
             }
         }
-        fprintf(temp, "%s;%s;%d;%.2f\n", s.Name, s.Surname, s.ID, s.gpa);
+        fprintf(temp, "%s,%s,%d,%.2f\n", s.Name, s.Surname, s.ID, s.gpa);
     }
 
     fclose(file);
@@ -189,10 +227,10 @@ void update(){
     if(isUpdated){
         remove(DATA_FILE);
         rename("temp.csv", DATA_FILE);
-        printf("U sucsefully updated the information about %d ID student!\n\n", updatedId);
+        printf("You successfully updated the information about %d ID student!\n\n", updatedId);
     } else{
         remove("temp.csv");
-        printf("THere is no student with %d ID.\n\n", updatedId);
+        printf("There is no student with %d ID.\n\n", updatedId);
     }
 }
 
@@ -210,9 +248,9 @@ void search(){
     printf("You can find the information about the student through his/her ID: ");
     scanf("%d", &searchId);
 
-    while(fscanf(file, " %[^;];%[^;];%d;%f\n", s.Name,s.Surname,&s.ID, &s.gpa) == 4){
+    while(fscanf(file, " %9[^,],%9[^,],%d,%f\n", s.Name,s.Surname,&s.ID, &s.gpa) == 4){
         if(s.ID == searchId){
-            printf("THe information about hte student:\n");
+            printf("\nThe information about the student:\n");
             printf("Name: %s\nSurname: %s\nID: %d\nGPA: %.2f\n", s.Name, s.Surname, s.ID, s.gpa);
             isFound = true;
             break;
@@ -236,10 +274,10 @@ void display(){
     struct Student s;
 
     printf("\tStudent List\n");
-    printf("%-12s %-12s %-8s %-5s\n", "Name", "Surname", "ID", "GPA");
+    printf("%-12s %-12s %-9s %-5s\n", "Name", "Surname", "ID", "GPA");
 
-    while(fscanf(file, " %[^;];%[^;];%d;%f\n", s.Name, s.Surname, &s.ID, &s.gpa) == 4){
-        printf("%-12s %-12s %-8d %-5.2f\n", s.Name, s.Surname, s.ID, s.gpa);
+    while(fscanf(file, " %9[^,],%9[^,],%d,%f\n", s.Name, s.Surname, &s.ID, &s.gpa) == 4){
+        printf("%-12s %-12s %-9d %-5.2f\n", s.Name, s.Surname, s.ID, s.gpa);
     }
 
     fclose(file);
