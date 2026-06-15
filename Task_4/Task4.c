@@ -12,7 +12,7 @@ void deposit(){
     scanf("%d", &input.card);
     printf("How much money you want to put on your card?: ");
     float money;
-    scanf("%f", &money);   
+    scanf("%f", &money);
     
     FILE *file = fopen(DATA_FILE, "a+");
     FILE *temp = fopen("temp.csv", "w");
@@ -24,13 +24,13 @@ void deposit(){
         return;
     }    
 
-    while(fscanf(file, " %[^;];%[^;];%d;%f\n", u.Name, u.Surname, &u.card, &u.balance) == 4){
+    while(fscanf(file, " %9[^,],%9[^,],%d,%f\n", u.Name, u.Surname, &u.card, &u.balance) == 4){
         if(u.card == input.card){
             u.balance += money;
             printf("\nYou sucsesfully deposited the money!\n");
             isFound = true;
         }
-        fprintf(temp, "%s;%s;%d;%f\n", u.Name,u.Surname, u.card, u.balance);
+        fprintf(temp, "%s,%s,%d,%.2f\n", u.Name,u.Surname, u.card, u.balance);
     }    
 
     if(!isFound){
@@ -39,8 +39,8 @@ void deposit(){
         printf("Surname: ");
         scanf("%9s", input.Surname);
         input.balance = money;
-        fprintf(temp, "%s;%s;%d;%f\n", input.Name, input.Surname, input.card, input.balance);
-        printf("\nYou sucsefully are added to the bank system!\n");
+        fprintf(temp, "%s,%s,%d,%.2f\n", input.Name, input.Surname, input.card, input.balance);
+        printf("\nYou sucsesfully are added to the bank system!\n");
     }
 
     fclose(file);
@@ -62,6 +62,11 @@ void withdraw(){
     printf("Enter the number of money you want to withdraw: ");
     scanf("%f", &money);
 
+    if (money <0){//negative number control
+        printf("\nYou cant withdraw this amount of money!\n");
+        return;
+    }
+
     FILE *file = fopen(DATA_FILE, "r");
     FILE *temp = fopen("temp.csv", "w");
     if(file == NULL || temp == NULL){
@@ -70,17 +75,17 @@ void withdraw(){
         return;
     }
 
-    while(fscanf(file, " %[^;];%[^;];%d;%f\n", u.Name, u.Surname, &u.card, &u.balance) == 4){
+    while(fscanf(file, " %9[^,],%9[^,],%d,%f\n", u.Name, u.Surname, &u.card, &u.balance) == 4){
         if(card == u.card){
             isFound = true;
             if(money > u.balance){
-                printf("\nYou cant withdraw the money! Your balance is: %f\n", u.balance);
+                printf("\nYou cant withdraw the money! Your balance is: %.2f\n", u.balance);
             } else{
                 u.balance -= money;
-                printf("\nYou sucsesfully complete withdraw process!\n");
+                printf("\nYou sucsesfully completed the withdrawal process!\n");
             }
         }
-        fprintf(temp, "%s;%s;%d;%f\n", u.Name, u.Surname, u.card, u.balance);
+        fprintf(temp, "%s,%s,%d,%.2f\n", u.Name, u.Surname, u.card, u.balance);
     }
 
     fclose(file);
@@ -112,10 +117,11 @@ void balance(){
         return;
     }
 
-    while(fscanf(file, " %[^;];%[^;];%d;%f\n", u.Name, u.Surname, &u.card, &u.balance) == 4){
+    while(fscanf(file, " %9[^,],%9[^,],%d,%f\n", u.Name, u.Surname, &u.card, &u.balance) == 4){
         if(card == u.card){
-            printf("\nName: %-12s\nSurname: %-12s\nCard: %-8d\nBalance: %.2f\n", u.Name,u.Surname, u.card, u.balance);
+            printf("\nName: %-12s\nSurname: %-12s\nCard: %-9d\nBalance: %.2f\n", u.Name,u.Surname, u.card, u.balance);
             isFound = true;
+            break;
         }
     }
 
